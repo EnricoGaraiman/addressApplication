@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello {{ app.user.name }}{% endblock %}
+
+{% block body %}
+    <div class="container profile-data mt-5 pt-3">
+        {% include 'partials/_alert_messages.html.twig' %}
+        <div class="row">
+            <div class="col-md">
+                {% include 'profile/_my_profile.html.twig' %}
+            </div>
+            <div class="col-md">
+                {% include 'profile/_my_default_address.html.twig' %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                {% include 'profile/_my_addresses.html.twig' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<div class="black-bg">
+    {{ form_start(form) }}
+    <h1>Add a new address</h1>
+    {{ form_row(form.country, {'attr': {'class': 'form-control'}}) }}
+    {{ form_row(form.city, {'attr': {'class': 'form-control'}}) }}
+    {{ form_row(form.address, {'attr': {'class': 'form-control'}}) }}
+    {{ form_row(form.default, { 'label': 'Set default address',
+        'attr': {'class': 'form-check-input mx-2'}}) }}
+    {{ form_row(form.add, { 'attr': {'class': 'form-control btn btn-dark mt-2 d-none'},
+        label: 'Add a new address'
+    }) }}
+    <button type="submit" class="btn btn-dark mt-2" name="add">Add a new address</button>
+    <a href="{{ path('profile') }}" class="btn btn-outline-light mt-2 float-end">Back to profile</a>
+    {{ form_end(form) }}
+    {{ form_end(form) }}
+</div>

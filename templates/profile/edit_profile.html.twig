@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello {{ app.user.name }}{% endblock %}
+
+{% block body %}
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div>
+            {% include 'partials/_alert_messages.html.twig' %}
+            <div class="black-bg p-3">
+                <h1>Edit your profile</h1>
+                {{ form_start(form) }}
+                {{ form_errors(form) }}
+
+                {{ form_row(form.name, {'attr': {'class': 'form-control'}}) }}
+                {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
+
+                {{ form_row(form.edit, { 'attr': {'class': 'form-control btn btn-dark mt-2 d-none'},
+                    label: 'Edit profile'
+                }) }}
+                <button type="submit" class="btn btn-light mt-2">Edit profile</button>
+                <a href="{{ path('profile') }}" class="btn btn-outline-light mt-2 float-end">Back to profile</a>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

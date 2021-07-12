@@ -1,0 +1,5 @@
+{% if message.message != '' %}
+    <div class="alert alert-{{ message.with }} mt-5 mx-2" role="alert">
+        {{ message.message }}
+    </div>
+{% endif %}

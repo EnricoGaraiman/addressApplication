@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Users{% endblock %}
+
+{% block body %}
+
+    <div id="users" class="container profile-data mt-5 pt-3">
+        <div>
+            {% include 'partials/_alert_messages.html.twig' %}
+            <div class="black-bg">
+                <form action="{{ path('addresses') }}" method="get">
+                    {% include 'partials/_search_bar.html.twig' %}
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>User</th>
+                            <th>Country</th>
+                            <th>City</th>
+                            <th>Address</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% set i = offset %}
+                        {% for address in addresses %}
+                            {% set i = i + 1 %}
+                            <tr>
+                                <td>{{ i }}</td>
+                                <td>{{ address.user.name }}</td>
+                                <td>{{ address.country }}</td>
+                                <td>{{ address.city }}</td>
+                                <td>{{ address.address }}</td>
+                                {% if address.user.email == app.user.username %}
+                                    <td>
+                                        <form method="post">
+                                            <button type="submit" class="btn btn-success" name="set_default"
+                                                    value="{{ address.id }}"
+                                                    onclick="return confirm('Are you sure you want to set a new default address?')">
+                                                <i
+                                                        class="fas fa-map-marker-alt"></i></button>
+                                            <button type="submit" class="btn btn-warning" name="update_address"
+                                                    value="{{ address.id }}"
+                                                    onclick="return confirm('Are you sure you want to update this address?')">
+                                                <i class="fas fa-edit"></i></button>
+                                            <button type="submit" class="btn btn-danger" name="delete_address"
+                                                    value="{{ address.id }}"
+                                                    onclick="return confirm('Are you sure you want to delete this address?')">
+                                                <i
+                                                        class="fas fa-trash-alt"></i></button>
+                                            {% if address.isDefault %}
+                                                <div class="btn btn-light"><i class="fas fa-star"></i></div>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                {% else %}
+                                    <td>No access</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include 'partials/_pagination.html.twig' %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

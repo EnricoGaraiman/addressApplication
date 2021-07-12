@@ -1,0 +1,35 @@
+<ul class="pagination justify-content-center">
+
+    {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link"
+               href="{{ path(app.request.get('_route'), {'page': page - 1, 'search': searchParameter, 'order': userOrderOption, 'itemsPerPage': itemsPerPage}) }}"
+               aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+    {% endif %}
+
+    {% for pageNumber in 1..numberOfPages %}
+        {% if pageNumber != 0 %}
+            {% if pageNumber == page %}
+                <li class="page-item"><a class="page-link" href="javascript:void(0)">{{ pageNumber }}</a></li>
+            {% else %}
+                <li class="page-item"><a class="page-link"
+                                         href="{{ path(app.request.get('_route'), {'page': pageNumber, 'search': searchParameter, 'order': userOrderOption, 'itemsPerPage': itemsPerPage}) }}">{{ pageNumber }}</a>
+                </li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {% if page < numberOfPages %}
+        <li class="page-item">
+            <a class="page-link"
+               href="{{ path(app.request.get('_route'), {'page': page + 1, 'search': searchParameter, 'order': userOrderOption, 'itemsPerPage': itemsPerPage}) }}"
+               aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    {% endif %}
+
+</ul>

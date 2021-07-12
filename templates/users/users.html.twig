@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Users{% endblock %}
+
+{% block body %}
+
+<div id="users" class="container profile-data mt-5 pt-3">
+
+    <div class="black-bg">
+        <form action="{{ path('users') }}" method="get"">
+            {% include 'partials/_search_bar.html.twig' %}
+            <div class="table-responsive">
+                <table class="table table-dark table-hover">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Default address</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% set i = offset %}
+                    {% for user in users %}
+                        {%  set i = i + 1 %}
+                        <tr>
+                            <td>{{ i }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            {% for address in addresses|filter(address => address.user == user)|filter(address => address.isDefault) %}
+                                <td>{{ address.country }}, {{ address.city }}, {{ address.address }}</td>
+                            {% else %}
+                                <td>No set</td>
+                            {% endfor %}
+                            {% if user.email == app.user.username %}
+                                <td>
+                                    <a href="{{ path('edit_profile') }}" class="btn btn-success" onclick="return confirm('Are you sure?')"><i class="fas fa-edit"></i></a>
+                                    <a href="{{ path('change_password') }}" class="btn btn-warning" onclick="return confirm('Are you sure?')"><i class="fas fa-key"></i></a>
+                                    <a href="{{ path('delete_account') }}" class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="fas fa-trash-alt"></i></a>
+                                </td>
+                            {% else %}
+                                <td>No access</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        {% include 'partials/_pagination.html.twig' %}
+
+    </div>
+</div>
+
+{% endblock %}

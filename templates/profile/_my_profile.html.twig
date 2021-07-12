@@ -1,0 +1,9 @@
+<h1>My profile</h1>
+<p>Your name: {{ user.name }}</p>
+<p>Your email: {{ user.email }}</p>
+<p>Edit your profile: <a href="{{ path('edit_profile') }}" class="btn btn-warning"
+                         onclick="return confirm('Are you sure?')">Edit profile</a></p>
+<p>Change password: <a href="{{ path('change_password') }}" class="btn btn-warning"
+                       onclick="return confirm('Are you sure?')">Change password</a></p>
+<p>Delete account: <a href="{{ path('delete_account') }}" class="btn btn-danger"
+                      onclick="return confirm('Are you sure?')">Delete account</a></p>

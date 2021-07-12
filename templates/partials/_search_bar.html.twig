@@ -1,0 +1,32 @@
+<div class="row my-3">
+    <div class="col-md-6 m-1">
+        <input type="text" value="{{ searchParameter!=null ? searchParameter:'' }}" name="search" class="form-control"
+               id="search" placeholder="Search by any parameter">
+    </div>
+    <div class="col-md m-1">
+        <select class="form-select form-select-sm h-100" name="order" aria-label=".form-select-sm">
+            {% for key, option in options %}
+                {% if userOrderOption == key %}
+                    <option value="{{ key }}" selected>{{ option }}</option>
+                {% else %}
+                    <option value="{{ key }}">{{ option }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md m-1">
+        <select class="form-select form-select-sm h-100" name="itemsPerPage" aria-label=".form-select-sm">
+            {% set options=[5,10,15] %}
+            {% for option in options %}
+                {% if itemsPerPage == option %}
+                    <option value="{{ option }}" selected>{{ option }}</option>
+                {% else %}
+                    <option value="{{ option }}">{{ option }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md m-1">
+        <button type="submit" class="btn btn-dark w-100">Search</button>
+    </div>
+</div>
