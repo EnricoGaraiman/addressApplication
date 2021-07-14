@@ -46,9 +46,27 @@ class AddressesRepository extends ServiceEntityRepository
             return $query->getQuery()->getSingleScalarResult();
         }
 
-        $query->orderBy('a.' . $orderBy, $orderType)
+        if($orderBy === 'city') {
+            $query
+                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
+                ->orderBy('c.' . 'name', $orderType)
+            ;
+        }
+        elseif($orderBy === 'country') {
+            $query
+                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
+                ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
+                ->orderBy('co.' . 'name', $orderType)
+            ;
+        }
+        else {
+            $query->orderBy('a.' . $orderBy, $orderType);
+        }
+
+        $query
             ->setMaxResults($limit)
-            ->setFirstResult($offset);
+            ->setFirstResult($offset)
+        ;
 
         return $query->getQuery()->getResult();
     }

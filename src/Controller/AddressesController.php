@@ -34,12 +34,13 @@ class AddressesController extends AbstractController
     {
         $message = ['message'=>'', 'with'=>'danger'];
         $options = [
-//            'country_asc' => 'By country (ASC)',
-//            'country_desc' => 'By country (DESC)',
+            'country_asc' => 'By country (ASC)',
+            'country_desc' => 'By country (DESC)',
             'city_asc' => 'By city (ASC)',
             'city_desc' => 'By city (DESC)',
             'address_asc' => 'By address (ASC)',
-            'address_desc' => 'By address (DESC)'];
+            'address_desc' => 'By address (DESC)'
+        ];
 
         // Set as default
         if($request->request->get('set_default') !== null) {
