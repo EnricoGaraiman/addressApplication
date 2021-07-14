@@ -49,7 +49,6 @@ class AddressesRepository extends ServiceEntityRepository
         $query->orderBy('a.' . $orderBy, $orderType)
             ->setMaxResults($limit)
             ->setFirstResult($offset);
-//        dd($query->getQuery());
 
         return $query->getQuery()->getResult();
     }
