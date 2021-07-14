@@ -25,25 +25,22 @@ class AddressesRepository extends ServiceEntityRepository
     public function getAddressesForOnePage($offset, $limit, $choose, $searchParameter, $orderBy, $orderType)
     {
         $query = $this->createQueryBuilder('a');
+        $query
+            ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
+            ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
+            ->innerJoin(Users::class, 'u', 'with', 'u.id = a.user')
+        ;
+
         if ($searchParameter !== '') {
             $query
                 ->orWhere('a.address LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
-                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
                 ->orWhere('c.name LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
-                ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
                 ->orWhere('co.name LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
-                ->innerJoin(Users::class, 'u', 'with', 'u.id = a.user')
                 ->orWhere('u.name LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
-            ;
-        }
-        else {
-            $query
-                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
-                ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
             ;
         }
 
