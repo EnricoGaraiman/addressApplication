@@ -143,10 +143,9 @@ class AddressesController extends AbstractController
         $user = $this->getUser();
 
         if ($request->get('slug') !== null) {
-            $addressUpdate = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $request->get('slug')[0], 'user'=>$user]);
-            if(is_string($request->get('slug'))) { // verific pt ca din profile se trimite array si din addresses string
-                $addressUpdate = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $request->get('slug'), 'user'=>$user]);
-            }
+            $addressId = is_string($request->get('slug')) ? $request->get('slug') :  $request->get('slug')[0];
+            $addressUpdate = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $addressId, 'user'=>$user]);
+
             if($addressUpdate === null) {
                 return new RedirectResponse($this->generateUrl('profile'));
             }

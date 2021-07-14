@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Addresses;
-use App\Entity\Users;
 use App\Form\EditProfileFormType;
 use App\Service\DeleteAddressService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,7 +29,7 @@ class ProfileController extends AbstractController
     public function profile(Request $request, DeleteAddressService $deleteAddressService): Response
     {
         $message = ['message' => '', 'with' => 'danger'];
-        $user = $this->getUser(); //userul logat
+        $user = $this->getUser();
         $userAddresses = $this->entityManager->getRepository(Addresses::class)->findBy(['user' => $user->getId()]);
         $defaultAddress = $this->entityManager->getRepository(Addresses::class)->findOneBy(['user' => $user, 'isDefault' => 1]);
 
