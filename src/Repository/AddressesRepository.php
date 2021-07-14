@@ -3,6 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Addresses;
+use App\Entity\City;
+use App\Entity\Country;
+use App\Entity\Users;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -24,13 +27,16 @@ class AddressesRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('a');
         if ($searchParameter !== '') {
             $query
-//                ->orWhere('a.country LIKE :searchParameter')
-//                ->setParameter('searchParameter', '%' . $searchParameter . '%')
-//                ->orWhere('a.city LIKE :searchParameter')
-//                ->innerJoin('a.city', 'c')
-//                ->where('c.name = :searchParameter')
-//                ->setParameter('searchParameter', '%' . $searchParameter . '%')
                 ->orWhere('a.address LIKE :searchParameter')
+                ->setParameter('searchParameter', '%' . $searchParameter . '%')
+                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
+                ->orWhere('c.name LIKE :searchParameter')
+                ->setParameter('searchParameter', '%' . $searchParameter . '%')
+                ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
+                ->orWhere('co.name LIKE :searchParameter')
+                ->setParameter('searchParameter', '%' . $searchParameter . '%')
+                ->innerJoin(Users::class, 'u', 'with', 'u.id = a.user')
+                ->orWhere('u.name LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
             ;
         }
