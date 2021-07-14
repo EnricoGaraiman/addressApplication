@@ -34,10 +34,10 @@ class FilterService
     public function orderDropdownProcessInAddresses($order)
     {
         switch ($order) {
-            case 'country_desc':
-                $orderBy = 'country';
-                $orderType = 'desc';
-                break;
+//            case 'country_desc':
+//                $orderBy = 'country';
+//                $orderType = 'desc';
+//                break;
             case 'city_asc':
                 $orderBy = 'city';
                 $orderType = 'asc';
@@ -55,8 +55,10 @@ class FilterService
                 $orderType = 'desc';
                 break;
             default:
-                $orderBy = 'country';
+                $orderBy = 'city';
                 $orderType = 'asc';
+//                $orderBy = 'country';
+//                $orderType = 'asc';
         }
         return [
             'orderBy' => $orderBy,

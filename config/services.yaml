@@ -25,4 +25,4 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\DataVersion:
         arguments:
-            $url_pattern: 'C:\Users\Home\adressApplication\version.txt'
+            $url_pattern: '%kernel.project_dir%/version.txt'

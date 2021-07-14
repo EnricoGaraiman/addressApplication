@@ -23,10 +23,13 @@ class AddressesRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('a');
         if ($searchParameter !== '') {
-            $query->orWhere('a.country LIKE :searchParameter')
-                ->setParameter('searchParameter', '%' . $searchParameter . '%')
-                ->orWhere('a.city LIKE :searchParameter')
-                ->setParameter('searchParameter', '%' . $searchParameter . '%')
+            $query
+//                ->orWhere('a.country LIKE :searchParameter')
+//                ->setParameter('searchParameter', '%' . $searchParameter . '%')
+//                ->orWhere('a.city LIKE :searchParameter')
+//                ->innerJoin('a.city', 'c')
+//                ->where('c.name = :searchParameter')
+//                ->setParameter('searchParameter', '%' . $searchParameter . '%')
                 ->orWhere('a.address LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
             ;
@@ -40,6 +43,7 @@ class AddressesRepository extends ServiceEntityRepository
         $query->orderBy('a.' . $orderBy, $orderType)
             ->setMaxResults($limit)
             ->setFirstResult($offset);
+//        dd($query->getQuery());
 
         return $query->getQuery()->getResult();
     }

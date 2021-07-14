@@ -10,3 +10,37 @@
         </div>
     </div>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).on('change', '#add_new_address_form_country', function() {
+            var countrySelector = $(this);
+            // Request the cities of the selected country.
+            $.ajax({
+                url: "{{ path('getcity') }}",
+                type: "GET",
+                dataType: "JSON",
+                data: {
+                    countryId: countrySelector.val()
+                },
+                success: function (cities) {
+                    var citySelect = $("#add_new_address_form_city");
+
+                    // Remove current options
+                    citySelect.html('');
+
+                    // Empty value ...
+                    citySelect.append('<option value> Select a city of ' + countrySelector.find("option:selected").text() + ' ...</option>');
+
+                    $.each(cities, function (key, city) {
+                        citySelect.append('<option value="' + city.id + '">' + city.name + '</option>');
+                    });
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        });
+    </script>
+{% endblock %}

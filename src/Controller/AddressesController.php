@@ -3,12 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Addresses;
+use App\Entity\City;
+use App\Entity\Country;
 use App\Form\AddNewAddressFormType;
+use App\Repository\CityRepository;
 use App\Service\DeleteAddressService;
 use App\Service\FilterService;
 use App\Service\UpdateAddressService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,8 +33,9 @@ class AddressesController extends AbstractController
     public function users(Request $request, FilterService $filterService, DeleteAddressService $deleteAddressService): Response
     {
         $message = ['message'=>'', 'with'=>'danger'];
-        $options = ['country_asc' => 'By country (ASC)',
-            'country_desc' => 'By country (DESC)',
+        $options = [
+//            'country_asc' => 'By country (ASC)',
+//            'country_desc' => 'By country (DESC)',
             'city_asc' => 'By city (ASC)',
             'city_desc' => 'By city (DESC)',
             'address_asc' => 'By address (ASC)',
@@ -101,31 +106,22 @@ class AddressesController extends AbstractController
      */
     public function addNewAddress(Request $request): Response
     {
-        $user = $this->getUser();
-        $form = $this->createForm(AddNewAddressFormType::class);
         $message = ['message' => '', 'with' => 'danger'];
+        $user = $this->getUser();
+        $form = $this->createForm(AddNewAddressFormType::class, (new Addresses()));
 
-        if ($request->request->get('add') !== null) {
-            $input = $request->request->get('add_new_address_form');
-            $address = new Addresses();
-            $address->setUser($user)
-                ->setCountry($input['country'])
-                ->setCity($input['city'])
-                ->setAddress($input['address']);
-            if (isset($input['default']) ) {
-                $addressDefault = $this->entityManager->getRepository(Addresses::class)->findOneBy(['user' => $user, 'isDefault' => 1]);
-                if($addressDefault !== null) {
-                    foreach ($user->getAddress() as $adr) {
-                        $adr->setIsDefault(0);
-                        $this->entityManager->persist($adr);
-                        $this->entityManager->flush();
-                    }
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $address = $form->getData();
+            if ($address->getIsDefault() !== false ) {
+                foreach ($user->getAddress() as $adr) {
+                    $adr->setIsDefault(0);
+                    $this->entityManager->persist($adr);
+                    $this->entityManager->flush();
                 }
-                $address->setIsDefault(1);
             }
-            else {
-                $address->setIsDefault(0);
-            }
+            $address->setUser($user);
             $this->entityManager->persist($address);
             $this->entityManager->flush();
             $message = ['message' => 'You set a new address', 'with' => 'success'];
@@ -142,31 +138,69 @@ class AddressesController extends AbstractController
      */
     public function updateAddress(Request $request, UpdateAddressService $updateAddressService): Response
     {
-        $form = $this->createForm(AddNewAddressFormType::class);
         $message = ['message' => '', 'with' => 'danger'];
+        $user = $this->getUser();
 
         if ($request->get('slug') !== null) {
-            $address = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $request->get('slug')[0]]);
+            $addressUpdate = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $request->get('slug')[0], 'user'=>$user]);
             if(is_string($request->get('slug'))) { // verific pt ca din profile se trimite array si din addresses string
-                $address = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $request->get('slug')]);
+                $addressUpdate = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $request->get('slug'), 'user'=>$user]);
+            }
+            if($addressUpdate === null) {
+                return new RedirectResponse($this->generateUrl('profile'));
             }
         } else {
             return new RedirectResponse($this->generateUrl('profile'));
         }
 
-        if ($request->request->get('update_address') !== null) {
-            if(is_string($request->get('slug'))) {
-                $message = $updateAddressService->updateAddress($request->request->get('add_new_address_form'), $request->get('slug'), $this->getUser());
+        $form = $this->createForm(AddNewAddressFormType::class, $addressUpdate);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid())
+        {
+            $address = $form->getData();
+            if ($address->getIsDefault() !== false ) {
+                foreach ($user->getAddress() as $adr) {
+                    $adr->setIsDefault(0);
+                    $this->entityManager->persist($adr);
+                    $this->entityManager->flush();
+                }
             }
-            else {
-                $message = $updateAddressService->updateAddress($request->request->get('add_new_address_form'), $request->get('slug')[0], $this->getUser());
-            }
+            $address->setUser($user);
+            $this->entityManager->persist($address);
+            $this->entityManager->flush();
+            $message = ['message' => 'You update the address', 'with' => 'success'];
         }
 
         return $this->render('update_address/update_address.html.twig', [
             'form' => $form->createView(),
             'message' => $message,
-            'address' => $address,
         ]);
+    }
+
+    /**
+     * @Route("addresses/getCityByCountry", name="getcity")
+     */
+    public function getCities(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $citiesRepository = $em->getRepository(City::class);
+
+        $cities = $citiesRepository->createQueryBuilder("q")
+            ->where("q.country = :cityid")
+            ->setParameter("cityid", $request->get("countryId"))
+            ->getQuery()
+            ->getResult()
+        ;
+
+        $responseArray = array();
+        foreach($cities as $city){
+            $responseArray[] = array(
+                "id" => $city->getId(),
+                "name" => $city->getName()
+            );
+        }
+
+        return new JsonResponse($responseArray);
     }
 }
