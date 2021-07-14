@@ -40,6 +40,12 @@ class AddressesRepository extends ServiceEntityRepository
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
             ;
         }
+        else {
+            $query
+                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
+                ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
+            ;
+        }
 
         if ($choose == 1) {
             $query->select('count(a.id)');
@@ -47,17 +53,10 @@ class AddressesRepository extends ServiceEntityRepository
         }
 
         if($orderBy === 'city') {
-            $query
-                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
-                ->orderBy('c.' . 'name', $orderType)
-            ;
+            $query->orderBy('c.' . 'name', $orderType);
         }
         elseif($orderBy === 'country') {
-            $query
-                ->innerJoin(City::class, 'c', 'with', 'a.city = c.id')
-                ->innerJoin(Country::class, 'co', 'with', 'c.country = co.id')
-                ->orderBy('co.' . 'name', $orderType)
-            ;
+            $query->orderBy('co.' . 'name', $orderType);
         }
         else {
             $query->orderBy('a.' . $orderBy, $orderType);
