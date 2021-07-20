@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Online store{% endblock %}
+
+{% block body %}
+    <div class="container profile-data mt-5 pt-3">
+        {% include 'partials/_alert_messages.html.twig' %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for product in products %}
+                {% include 'products/_product.html.twig' %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function addItemToCart(productId) {
+            let productQuantity = $("#quantity".concat(productId)).val();
+            let cartQuantity = parseInt($('#cart-icon .item-number').html());
+            $('#cart-icon .item-number').html(cartQuantity + parseInt(productQuantity));
+            $.ajax({
+                type: 'GET',
+                url: '{{ path('add_to_card_product') }}',
+                data: {
+                    'id': productId,
+                    'quantity': productQuantity
+                },
+                success: function (response) {
+
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                    $('#cart-icon .item-number').html(cartQuantity - parseInt(productQuantity));
+                }
+            });
+        }
+    </script>
+{% endblock %}

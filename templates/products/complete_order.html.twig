@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Online store{% endblock %}
+
+{% block body %}
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div>
+            <div class="cart-dashboard">
+                <h1>ORDER CONFIRMATION</h1>
+                <p>{{ app.user.name }}, thank you for your order!</p>
+                <p>You will receive an email with your order details</p>
+                <br><br>
+                <h1>Summary</h1>
+                <p>Total: {{ totalPrice }} lei</p>
+                <p>Number of products: {{ numberOfProducts }}</p>
+                <p>Address: {{ destinationAddress.city.country }}, {{ destinationAddress.city }}
+                    , {{ destinationAddress.address }}</p>
+            </div>
+            <a href="{{ path('my_orders') }}" class="btn btn-success mt-3">Orders History </a>
+        </div>
+    </div>
+{% endblock %}
+

@@ -49,9 +49,15 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $address;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Orders::class, mappedBy="user")
+     */
+    private $userorder;
+
     public function __construct()
     {
         $this->address = new ArrayCollection();
+        $this->userorder = new ArrayCollection();
     }
 
     public function getDefaultAddress()
@@ -186,6 +192,36 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($address->getAddresses() === $this) {
                 $address->setAddresses(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Orders[]
+     */
+    public function getUserorder(): Collection
+    {
+        return $this->userorder;
+    }
+
+    public function addUserorder(Orders $userorder): self
+    {
+        if (!$this->userorder->contains($userorder)) {
+            $this->userorder[] = $userorder;
+            $userorder->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserorder(Orders $userorder): self
+    {
+        if ($this->userorder->removeElement($userorder)) {
+            // set the owning side to null (unless already changed)
+            if ($userorder->getUser() === $this) {
+                $userorder->setUser(null);
             }
         }
 

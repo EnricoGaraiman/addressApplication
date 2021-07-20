@@ -41,4 +41,5 @@ security:
          - { path: ^/users, roles: IS_AUTHENTICATED_FULLY }
          - { path: ^/addresses, roles: IS_AUTHENTICATED_FULLY }
          - { path: ^/add_new_address, roles: IS_AUTHENTICATED_FULLY }
+         - { path: ^/products, roles: IS_AUTHENTICATED_FULLY }
 

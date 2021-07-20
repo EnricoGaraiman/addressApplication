@@ -1,0 +1,19 @@
+<div class="col">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text">{{ product.description }}</p>
+            <p class="price">{{ product.price }} lei</p>
+            <div class="row">
+                <div class="col-8">
+                    <button id="add_to_cart" class="btn btn-outline-dark"
+                        onClick="addItemToCart({{ product.id}})"> Add to cart
+                    </button>
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control m-0" id="quantity{{ product.id }}" name="quantity" min="1" max="10" value="1">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

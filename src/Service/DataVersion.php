@@ -18,6 +18,12 @@ class DataVersion
             fwrite($handle, $date);
             fclose($handle);
         }
+        else {
+            $date = date('Y-m-d H:i:s');
+            $handle = fopen($this->url_pattern, "w");
+            fwrite($handle, $date);
+            fclose($handle);
+        }
         return file_get_contents($this->url_pattern);
     }
 }

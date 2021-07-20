@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Online store{% endblock %}
+
+{% block body %}
+    <div class="container mt-5 pt-3">
+        <div id="cart" class="row">
+            <div class="col-md-8">
+                {% include 'partials/_alert_messages.html.twig' %}
+                {% include 'products/_table_cart.html.twig' %}
+            </div>
+            <div class="col-md">
+                <div class="cart-dashboard mt-3">
+                    <h1>Your order</h1>
+                    <p>You have {{ numberOfProducts }} products in your cart.</p>
+                    <p>Total price: {{ totalPrice }} lei</p>
+                    <div>
+                        <button class="btn btn-danger" onclick="deleteAllProducts()">Delete all products</button>
+                    </div>
+                </div>
+                <div class="cart-dashboard mt-4">
+                    <h1>Destination</h1>
+                    {% if destinationAddress %}
+                        <p>{{ destinationAddress.city.country }}, {{ destinationAddress.city }}
+                            , {{ destinationAddress.address }}</p>
+                    {% else %}
+                        <p>You dont have a default address. Add one now</p>
+                        <button type="button" class="btn btn-light" data-bs-toggle="modal"
+                                data-bs-target="#addressModal">
+                            Add a destination address
+                        </button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% include 'add_new_address/_form_add_new_address.html.twig' %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="cart-dashboard mt-4">
+                    <h1>Complete order</h1>
+                    {% if cart and destinationAddress %}
+                        <a href="{{ path('complete_order') }}" class="btn btn-success"
+                           onclick="return confirm('Your order contain {{ numberOfProducts }} with total price of {{ totalPrice }} lei. Are you sure?')">
+                            Complete order </a>
+                    {% else %}
+                        <p class="alert alert-danger">You dont have a default address or your cart is empty</p>
+                        <a href="{{ path('complete_order') }}" class="btn btn-success disabled">Complete order </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function setCookie(cname, cvalue, exdays) {
+            const d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            let expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function deleteAllProducts() {
+            setCookie('cart', '', -1);
+            location.reload(true);
+        }
+
+        function deleteItemFromCart(productId) {
+            $.ajax({
+                type: 'GET',
+                url: '{{ path('delete_product_from_cart') }}',
+                data: {
+                    'id': productId,
+                },
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        }
+
+        function modifyQuantity(productId) {
+            let productQuantity = $("#quantity".concat(productId)).val();
+            $.ajax({
+                type: 'GET',
+                url: '{{ path('modify_product_from_cart') }}',
+                data: {
+                    'id': productId,
+                    'quantity': productQuantity
+                },
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        }
+
+        $(document).on('change', '#add_new_address_form_country', function () {
+            var countrySelector = $(this);
+            // Request the cities of the selected country.
+            $.ajax({
+                url: "{{ path('getcity') }}",
+                type: "GET",
+                dataType: "JSON",
+                data: {
+                    countryId: countrySelector.val()
+                },
+                success: function (cities) {
+                    var citySelect = $("#add_new_address_form_city");
+
+                    // Remove current options
+                    citySelect.html('');
+
+                    // Empty value ...
+                    citySelect.append('<option value> Select a city of ' + countrySelector.find("option:selected").text() + ' ...</option>');
+
+                    $.each(cities, function (key, city) {
+                        citySelect.append('<option value="' + city.id + '">' + city.name + '</option>');
+                    });
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        });
+
+    </script>
+{% endblock %}

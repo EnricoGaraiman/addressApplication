@@ -2,6 +2,7 @@ twig:
     default_path: '%kernel.project_dir%/templates'
     globals:
         actualDate: '@App\Service\DataVersion'
+        numberOfProductsInCart: '@App\Service\NumberOfProductsService'
 
 when@test:
     twig:
