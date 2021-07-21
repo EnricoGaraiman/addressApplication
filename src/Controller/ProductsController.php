@@ -7,10 +7,14 @@ use App\Entity\Orders;
 use App\Entity\OrdersProducts;
 use App\Entity\Products;
 use App\Form\AddNewAddressFormType;
+use App\Form\ProductFormType;
+use App\Service\FileUploaderService;
+use App\Service\FilterService;
 use App\Service\OrderConfirmationEmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,16 +30,47 @@ class ProductsController extends AbstractController
     }
 
     /**
-     * @Route("/products", name="products")
+     * @Route("/products/{page}", name="products", defaults={"page": 1},  requirements={"page"="\d+"})
      */
-    public function products(): Response
+    public function products(Request $request, FilterService $filterService): Response
     {
-        $message = ['message'=>'', 'with'=>''];
-        $products = $this->entityManager->getRepository(Products::class)->findAll();
+        $options = [
+            'product_asc' => 'By product name (ASC)',
+            'product_desc' => 'By product name (DESC)',
+            'price_asc' => 'By price (ASC)',
+            'price_desc' => 'By price (DESC)',
+        ];
+
+        // Search
+        $searchParameter = '';
+        if ($request->get('search') !== null) {
+            $searchParameter = $request->get('search');
+        }
+
+        // Order
+        $userOrderOption = $request->get('order');
+        $order = $filterService->orderDropdownProducts($userOrderOption);
+
+        // View
+        $itemsPerPage = $request->get('itemsPerPage', 6);
+        $page = (int)max(0, $request->get('page', 0));
+        $offset = ($page - 1) * $itemsPerPage;
+        $numberOfProducts = $this->entityManager->getRepository(Products::class)
+            ->getProductsForOnePage($offset, $itemsPerPage, 1, $searchParameter, $order['orderBy'], $order['orderType']);
+        $numberOfPages = ceil($numberOfProducts / $itemsPerPage);
+        $products = $this->entityManager->getRepository(Products::class)
+            ->getProductsForOnePage($offset, $itemsPerPage, 0, $searchParameter, $order['orderBy'], $order['orderType']);
+
 
         return $this->render('products/products.html.twig', [
-            'message'=>$message,
             'products'=>$products,
+            'numberOfPages' => $numberOfPages,
+            'numberOfProducts' => $numberOfProducts,
+            'itemsPerPage' => $itemsPerPage,
+            'page' => $page,
+            'searchParameter' => $searchParameter,
+            'userOrderOption' => $userOrderOption,
+            'options' => $options,
         ]);
     }
 
@@ -43,14 +78,20 @@ class ProductsController extends AbstractController
      * @Route("/products/cart", name="cart")
      */
     public function cart(Request $request):Response {
-        $message = ['message'=>'', 'with'=>''];
         $response = new Response();
-        $defaultAddress = $this->entityManager->getRepository(Addresses::class)->findOneBy(['user'=>$this->getUser(), 'isDefault'=>1]);
+        $defaultAddress = $this->entityManager->getRepository(Addresses::class)
+            ->findOneBy(['user'=>$this->getUser(), 'isDefault'=>1]);
         $cart = unserialize($request->cookies->get('cart'));
         $totalPrice = 0; $numberOfProducts = 0; $products = []; $form = null;
 
         // Add destination address
         $destinationAddress = $defaultAddress;
+        if($request->cookies->get('destinationAddress'))
+        {
+            $destinationAddress = $this->entityManager->getRepository(Addresses::class)
+                ->findOneBy(['id'=>$request->cookies->get('destinationAddress')]);
+        }
+
         if($destinationAddress === null)
         {
             $form = $this->createForm(AddNewAddressFormType::class, (new Addresses()));
@@ -59,7 +100,6 @@ class ProductsController extends AbstractController
             {
                 $destinationAddress = $this->setDestinationAddressIntoDatabaseAndCookie($form);
             }
-            $message = ['message'=>'Your dont have a default address', 'with'=>'danger'];
         }
         else
         {
@@ -81,13 +121,8 @@ class ProductsController extends AbstractController
                 }
             }
         }
-        else
-        {
-            $message = ['message'=>'Your cart is empty. First add your product from "Online Store"', 'with'=>'danger'];
-        }
 
         return $this->render('products/cart.html.twig', [
-            'message'=>$message,
             'products'=>$products,
             'cart'=>$cart,
             'destinationAddress'=>$destinationAddress,
@@ -103,7 +138,8 @@ class ProductsController extends AbstractController
     public function completeOrder(Request $request, OrderConfirmationEmailService $orderConfirmationEmailService):Response
     {
         $cart = unserialize($request->cookies->get('cart'));
-        $destinationAddress = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id'=>$request->cookies->get('destinationAddress')]);
+        $destinationAddress = $this->entityManager->getRepository(Addresses::class)
+            ->findOneBy(['id'=>$request->cookies->get('destinationAddress')]);
         $totalPrice = 0; $numberOfProducts = 0;
         $order = new Orders();
 
@@ -167,7 +203,8 @@ class ProductsController extends AbstractController
 
         foreach ($orders as $order)
         {
-            $fullOrders[$order->getId()] = $this->entityManager->getRepository(OrdersProducts::class)->findBy(['parentOrder'=>$order->getId()]);
+            $fullOrders[$order->getId()] = $this->entityManager->getRepository(OrdersProducts::class)
+                ->findBy(['parentOrder'=>$order->getId()]);
         }
 
         return $this->render('products/orders.html.twig', [
@@ -274,6 +311,37 @@ class ProductsController extends AbstractController
         $response->headers->setCookie($this->setMyCookie('destinationAddress', $address->getId()));
         $response->sendHeaders();
         return $address;
+    }
+
+    /**
+     * @Route("/products/add_product", name="add_product")
+     */
+    public function new(Request $request, FileUploaderService $fileUploader)
+    {
+        $product = new Products();
+        $form = $this->createForm(ProductFormType::class, $product);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /**
+             * @var UploadedFile $imageFile
+             */
+            $imageFile = $form->get('image')->getData();
+            $product = $form->getData();
+
+            if ($imageFile) {
+                $imageFileName = $fileUploader->upload($imageFile);
+                $product->setBrochureFilename($imageFileName);
+            }
+
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+            return $this->redirectToRoute('products');
+        }
+
+        return $this->render('products/add_product.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
 }

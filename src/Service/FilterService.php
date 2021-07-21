@@ -63,4 +63,29 @@ class FilterService
             'orderType' => $orderType
         ];
     }
+
+    public function orderDropdownProducts($order)
+    {
+        switch ($order) {
+            case 'product_desc':
+                $orderBy = 'name';
+                $orderType = 'desc';
+                break;
+            case 'price_asc':
+                $orderBy = 'price';
+                $orderType = 'asc';
+                break;
+            case 'price_desc':
+                $orderBy = 'price';
+                $orderType = 'desc';
+                break;
+            default:
+                $orderBy = 'name';
+                $orderType = 'asc';
+        }
+        return [
+            'orderBy' => $orderBy,
+            'orderType' => $orderType
+        ];
+    }
 }

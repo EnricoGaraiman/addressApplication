@@ -17,7 +17,7 @@ body {
     border-radius: 10px;
 }
 
-#users .row .col-md {
+#users .row .col-md, #products .row .col-md {
     background: none;
     padding: 0 10px;
     margin: 0;
@@ -87,6 +87,15 @@ caption {
     padding: 0 4px;
 }
 
+.no-padding {
+    padding: 0;
+    margin-right: 20px;
+}
+
+input[type='number'] {
+    border: 1px solid #000000;
+}
+
 @media only screen and (max-width: 768px) {
     .btn {
         width: 100%;
@@ -104,5 +113,9 @@ caption {
 
     #cart {
         flex-direction: column-reverse;
+    }
+
+    #add_to_cart {
+        margin: 0;
     }
 }

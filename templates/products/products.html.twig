@@ -3,13 +3,16 @@
 {% block title %}Online store{% endblock %}
 
 {% block body %}
-    <div class="container profile-data mt-5 pt-3">
-        {% include 'partials/_alert_messages.html.twig' %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div id="products" class="container profile-data mt-5 pt-3 mb-5">
+        <form action="{{ path('products') }}" method="get">
+        {% include 'partials/_search_bar.html.twig' %}
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
             {% for product in products %}
                 {% include 'products/_product.html.twig' %}
             {% endfor %}
         </div>
+        {% include 'partials/_pagination.html.twig' %}
+        </form>
     </div>
 {% endblock %}
 

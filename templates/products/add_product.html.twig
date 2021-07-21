@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Online store{% endblock %}
+
+{% block body %}
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        {{ form_start(form) }}
+        <h1>Add a new product</h1>
+        {{ form_row(form.name, {'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.description, {'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.price, {'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.image, {'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.add, {'attr': {'class': 'btn btn-dark mt-2'}}) }}
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+

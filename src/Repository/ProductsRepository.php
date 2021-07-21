@@ -19,6 +19,28 @@ class ProductsRepository extends ServiceEntityRepository
         parent::__construct($registry, Products::class);
     }
 
+    public function getProductsForOnePage($offset, $limit, $choose, $searchParameter, $orderBy, $orderType)
+    {
+        $query = $this->createQueryBuilder('p');
+        if ($searchParameter !== '') {
+            $query->orWhere('p.name LIKE :searchParameter')
+                ->setParameter('searchParameter', '%' . $searchParameter . '%')
+                ->orWhere('p.price LIKE :searchParameter')
+                ->setParameter('searchParameter', '%' . $searchParameter . '%');
+        }
+
+        if ($choose == 1) {
+            $query->select('count(p.id)');
+            return $query->getQuery()->getSingleScalarResult();
+        }
+
+        $query->orderBy('p.' . $orderBy, $orderType)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset);
+
+        return $query->getQuery()->getResult();
+    }
+
     // /**
     //  * @return Products[] Returns an array of Products objects
     //  */
