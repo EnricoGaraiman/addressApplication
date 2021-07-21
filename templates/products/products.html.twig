@@ -6,13 +6,13 @@
     <div id="products" class="container profile-data mt-5 pt-3 mb-5">
         <form action="{{ path('products') }}" method="get">
         {% include 'partials/_search_bar.html.twig' %}
+        </form>
         <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
             {% for product in products %}
                 {% include 'products/_product.html.twig' %}
             {% endfor %}
         </div>
         {% include 'partials/_pagination.html.twig' %}
-        </form>
     </div>
 {% endblock %}
 
@@ -21,8 +21,9 @@
     <script>
         function addItemToCart(productId) {
             let productQuantity = $("#quantity".concat(productId)).val();
-            let cartQuantity = parseInt($('#cart-icon .item-number').html());
-            $('#cart-icon .item-number').html(cartQuantity + parseInt(productQuantity));
+            let jqSelector = $('#cart-icon .item-number');
+            let cartQuantity = parseInt(jqSelector.html());
+            jqSelector.html(cartQuantity + parseInt(productQuantity));
             $.ajax({
                 type: 'GET',
                 url: '{{ path('add_to_card_product') }}',

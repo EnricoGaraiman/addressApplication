@@ -50,7 +50,7 @@
                                 class="item-number">{{ numberOfProductsInCart.getNumberOfProducts(app.request) }}</span></a>
                     <a class="nav-link navbar-text nav-cart" href="{{ path('my_orders') }}">Your orders</a>
                     <span class="navbar-text"> Hi, {{ app.user.name }}!
-                        <a href="{{ path('app_logout') }}">Logout</a>
+                        <a href="{{ path('app_logout') }}" onclick="setCookie('cart', '', -1); setCookie('destinationAddress', '', -1)">Logout</a>
                     </span>
                 {% endif %}
             </div>
@@ -75,6 +75,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
+    <script src="{{ asset('assets/js/main.js?v=' ~actualDate.getVersion()) }}"></script>
     <script src="https://kit.fontawesome.com/ce63917dfd.js" crossorigin="anonymous"></script>
 {% endblock %}
 </body>

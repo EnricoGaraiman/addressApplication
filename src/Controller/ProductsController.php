@@ -42,10 +42,7 @@ class ProductsController extends AbstractController
         ];
 
         // Search
-        $searchParameter = '';
-        if ($request->get('search') !== null) {
-            $searchParameter = $request->get('search');
-        }
+        $searchParameter = $request->get('search') !== null ? $request->get('search') : '';
 
         // Order
         $userOrderOption = $request->get('order');
