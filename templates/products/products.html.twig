@@ -5,7 +5,8 @@
 {% block body %}
     <div id="products" class="container profile-data mt-5 pt-3 mb-5">
         <form action="{{ path('products') }}" method="get">
-        {% include 'partials/_search_bar.html.twig' %}
+            {% include 'partials/_search_bar.html.twig' %}
+            {% include 'products/export_products.html.twig' %}
         </form>
         <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
             {% for product in products %}
@@ -35,7 +36,7 @@
 
                 },
                 error: function (err) {
-                    alert("An error ocurred while loading data ...");
+                    alert("An error occurred while loading data ...");
                     $('#cart-icon .item-number').html(cartQuantity - parseInt(productQuantity));
                 }
             });

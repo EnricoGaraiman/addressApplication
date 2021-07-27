@@ -15,7 +15,7 @@
     {{ parent() }}
     <script>
         $(document).on('change', '#add_new_address_form_country', function() {
-            var countrySelector = $(this);
+            let countrySelector = $(this);
             // Request the cities of the selected country.
             $.ajax({
                 url: "{{ path('getcity') }}",
@@ -25,7 +25,7 @@
                     countryId: countrySelector.val()
                 },
                 success: function (cities) {
-                    var citySelect = $("#add_new_address_form_city");
+                    let citySelect = $("#add_new_address_form_city");
 
                     // Remove current options
                     citySelect.html('');

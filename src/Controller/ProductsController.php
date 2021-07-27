@@ -3,22 +3,33 @@
 namespace App\Controller;
 
 use App\Entity\Addresses;
+use App\Entity\Files;
 use App\Entity\Orders;
 use App\Entity\OrdersProducts;
 use App\Entity\Products;
 use App\Form\AddNewAddressFormType;
 use App\Form\ProductFormType;
+use App\Service\ExportService;
 use App\Service\FileUploaderService;
 use App\Service\FilterService;
 use App\Service\OrderConfirmationEmailService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
+
 
 class ProductsController extends AbstractController
 {
@@ -34,6 +45,15 @@ class ProductsController extends AbstractController
      */
     public function products(Request $request, FilterService $filterService): Response
     {
+        if($request->get('export_products') !== null)
+        {
+            return new RedirectResponse($this->generateUrl('export_products', [
+                'search'=>$request->get('search'),
+                'order'=>$request->get('order'),
+                'selection'=>$request->get('selection')
+            ]));
+        }
+
         $options = [
             'product_asc' => 'By product name (ASC)',
             'product_desc' => 'By product name (DESC)',
@@ -58,7 +78,6 @@ class ProductsController extends AbstractController
         $products = $this->entityManager->getRepository(Products::class)
             ->getProductsForOnePage($offset, $itemsPerPage, 0, $searchParameter, $order['orderBy'], $order['orderType']);
 
-
         return $this->render('products/products.html.twig', [
             'products'=>$products,
             'numberOfPages' => $numberOfPages,
@@ -68,6 +87,20 @@ class ProductsController extends AbstractController
             'searchParameter' => $searchParameter,
             'userOrderOption' => $userOrderOption,
             'options' => $options,
+        ]);
+    }
+
+    /**
+     * @Route("/products/product/{slug}", name="product")
+     */
+    public function product(Request $request): Response
+    {
+        $product = $this->entityManager->getRepository(Products::class)->findOneBy(['slug'=>$request->get('slug')]);
+        $files = $this->entityManager->getRepository(Files::class)->findBy(['product'=>$product->getId()]);
+
+        return $this->render('products/product.html.twig', [
+            'product'=>$product,
+            'files'=>$files
         ]);
     }
 
@@ -149,7 +182,7 @@ class ProductsController extends AbstractController
                 $order->setUser($this->getUser())
                     ->setAddress($destinationAddress)
                     ->setTotal(0)
-                    ->setOrderDate(new \DateTime());
+                    ->setOrderDate(new DateTime());
                 $this->entityManager->persist($order);
                 $this->entityManager->flush();
 
@@ -196,7 +229,7 @@ class ProductsController extends AbstractController
     public function myOrders(): Response
     {
         $fullOrders = [];
-        $orders = $this->entityManager->getRepository(Orders::class)->findAll();
+        $orders = $this->entityManager->getRepository(Orders::class)->findBy(['user'=>$this->getUser()]);
 
         foreach ($orders as $order)
         {
@@ -313,32 +346,202 @@ class ProductsController extends AbstractController
     /**
      * @Route("/products/add_product", name="add_product")
      */
-    public function new(Request $request, FileUploaderService $fileUploader)
+    public function new(Request $request, FileUploaderService $fileUploader, SluggerInterface $slugger)
     {
         $product = new Products();
         $form = $this->createForm(ProductFormType::class, $product);
+
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            /**
-             * @var UploadedFile $imageFile
-             */
-            $imageFile = $form->get('image')->getData();
+            $imagesFile = $form->get('image')->getData();
             $product = $form->getData();
-
-            if ($imageFile) {
-                $imageFileName = $fileUploader->upload($imageFile);
-                $product->setBrochureFilename($imageFileName);
+            if (count($imagesFile) > 0) {
+                foreach ($imagesFile as $key=>$imageFile)
+                {
+                    if($imageFile)
+                    {
+                        $fileName = $fileUploader->upload($imageFile['name']);
+                        $file = new Files();
+                        $file->setName($fileName)
+                            ->setType(Files::TYPE['image']);
+                        if ($imageFile['position'] !== null)
+                        {
+                            $file->setPosition($imageFile['position']);
+                        }
+                        else
+                        {
+                            $file->setPosition($key);
+                        }
+                        $product->addFile($file);
+                    }
+                }
             }
 
+            $documentFile = $form->get('document')->getData();
+            if($documentFile)
+            {
+                $fileName = $fileUploader->upload($documentFile);
+                $file = new Files();
+                $file->setName($fileName)
+                    ->setType(Files::TYPE['document'])
+                    ->setPosition(0);
+                $product->addFile($file);
+            }
+
+            $sameNameProductCount = count((array)$this->entityManager->getRepository(Products::class)->findBy(['name'=>$product->getName()]));
+            $slug = $sameNameProductCount >= 1 ? $slugger->slug($product->getName()) . '-' . $sameNameProductCount : $slugger->slug($product->getName());
+            $product->setSlug($slug);
             $this->entityManager->persist($product);
             $this->entityManager->flush();
-            return $this->redirectToRoute('products');
+            return new RedirectResponse($this->generateUrl('products'));
         }
 
         return $this->render('products/add_product.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/products/update_product", name="update_product")
+     */
+    public function updateProduct(Request $request, FileUploaderService $fileUploader, SluggerInterface $slugger, ParameterBagInterface $parameterBag): Response
+    {
+        $productUpdate = $this->entityManager->getRepository(Products::class)->findOneBy(['slug'=>$request->get('product')]);
+        $filesUpdate = $this->entityManager->getRepository(Files::class)->findBy(['product'=>$productUpdate->getId()]);
+        $form = $this->createForm(ProductFormType::class, $productUpdate);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $imagesFile = $form->get('image')->getData();
+            $product = $form->getData();
+            if (count($imagesFile) > 0) {
+                foreach ($imagesFile as $key => $imageFile) {
+                    if ($imageFile) {
+                        $fileName = $fileUploader->upload($imageFile['name']);
+                        $file = new Files();
+                        $file->setName($fileName)
+                            ->setType(Files::TYPE['image']);
+                        if ($imageFile['position'] !== null) {
+                            $file->setPosition($imageFile['position']);
+                        } else {
+                            $file->setPosition($key);
+                        }
+                        $product->addFile($file);
+                    }
+                }
+            }
+
+            $documentFile = $form->get('document')->getData();
+            if ($documentFile) {
+                $fileName = $fileUploader->upload($documentFile);
+                $file = new Files();
+                $file->setName($fileName)
+                    ->setType(Files::TYPE['document'])
+                    ->setPosition(0);
+                $product->addFile($file);
+            }
+
+            $sameNameProductCount = count((array)$this->entityManager->getRepository(Products::class)->findBy(['name'=>$product->getName()]));
+            $slug = $sameNameProductCount >= 1 ? $slugger->slug($product->getName()) . '-' . $sameNameProductCount : $slugger->slug($product->getName());
+            $product->setSlug($slug);
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+            return new RedirectResponse($this->generateUrl('update_product', ['product'=>$product->getSlug()]));
+        }
+
+        if($request->request->get('delete_file') !== null)
+        {
+            $file = $this->entityManager->getRepository(Files::class)->findOneBy(['name'=>$request->request->get('delete_file')]);
+            $fs = new Filesystem();
+            $fs->remove($parameterBag->get('brochures_directory').'/'.$file->getName());
+            $this->entityManager->remove($file);
+            $this->entityManager->flush();
+        }
+
+        if($request->request->get('change_position') !== null)
+        {
+            $file = $this->entityManager->getRepository(Files::class)->findOneBy(['name'=>$request->request->get('change_position')]);
+            $file->setPosition($request->request->get('position'));
+            $this->entityManager->persist($file);
+            $this->entityManager->flush();
+        }
+
+        return $this->render('products/update_product.html.twig', [
+            'form'=>$form->createView(),
+            'product'=>$productUpdate,
+            'filesUpdate'=>$filesUpdate
+        ]);
+    }
+
+    /**
+     * @Route("/products/preview_document", name="preview_document")
+     */
+    public function previewDocument(Request $request, ParameterBagInterface $parameterBag): BinaryFileResponse
+    {
+        return $this->file($parameterBag->get('brochures_directory').'/'.
+            $request->get('documentName'), $request->get('documentName'), ResponseHeaderBag::DISPOSITION_INLINE);
+    }
+
+    /**
+     * @Route("/products/download_document", name="download_document")
+     */
+    public function downloadDocument(Request $request, ParameterBagInterface $parameterBag): BinaryFileResponse
+    {
+        return $this->file(new File($parameterBag->get('brochures_directory').'/'.$request->get('documentName')));
+    }
+
+    /**
+     * @Route("/products/export_products", name="export_products")
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function exportProducts(Request $request, FilterService $filterService, ExportService $exportService): RedirectResponse
+    {
+        // Search
+        $searchParameter = $request->get('search') !== null ? $request->get('search') : '';
+
+        // Order
+        $userOrderOption = $request->get('order');
+        $order = $filterService->orderDropdownProducts($userOrderOption);
+
+        // Get products
+        $products = $this->entityManager->getRepository(Products::class)
+            ->getProductsForOnePage(null, null, 0, $searchParameter, $order['orderBy'], $order['orderType']);
+
+        // Export
+        $spreadsheet = new Spreadsheet();
+        $headerFile = $request->get('selection');
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+        $spreadsheet->getActiveSheet()
+            ->fromArray(
+                $headerFile
+            );
+
+        foreach ($products as $index=>$product)
+        {
+            $rowArray = [];
+            foreach ($headerFile as $head)
+            {
+                $rowArray[$head] = $exportService->exportSelection($head, $product, $request);
+            }
+            $spreadsheet->getActiveSheet()
+                ->fromArray(
+                    $rowArray,
+                    null,
+                    'A'.($index+2)
+                );
+        }
+
+        foreach(range('A','G') as $columnID)
+        {
+            $spreadsheet->getActiveSheet()->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="products '.(new DateTime())->format('Y-m-d H-i-s').'.xlsx"');
+        $writer->save('php://output');
+
+        return new RedirectResponse($this->generateUrl('products'));
     }
 
 }

@@ -1,24 +1,27 @@
-<div class="col">
-    <div class="card position-relative">
-        {% if product.brochureFilename %}
-            <img src="{{ asset('uploads/images/'~product.brochureFilename) }}" class="card-img-top" alt="{{ product.brochureFilename }}" height="50%">
-        {% else %}
-            <img src="{{ asset('assets/img/no-image.jfif') }}" class="card-img-top" alt="No image" height="50%">
-        {% endif %}
-        <div class="card-body">
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p class="card-text">{{ product.description }}</p>
-            <p class="price mb-5">{{ product.price }} lei</p>
-            <div class="row position-absolute bottom-0 mb-3 w-100">
-                <div class="col-8">
-                    <button id="add_to_cart" class="btn btn-outline-dark"
-                        onClick="addItemToCart({{ product.id }})"> Add to cart
-                    </button>
-                </div>
-                <div class="col no-padding">
-                    <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" max="10" value="1">
+    <div class="col">
+        <div class="card position-relative">
+            <a href="{{ asset('products/product/'~product.slug) }}">
+                {% set file = filesService.getThumbnail(product) %}
+                {% if file %}
+                    <img src="{{ asset('uploads/images/'~file.name) }}" class="card-img-top mb-3" alt="{{ file.name }}" height="300px">
+                {% else %}
+                    <img src="{{ asset('assets/img/no-image.jfif') }}" class="card-img-top" alt="No image" height="300px">
+                {% endif %}
+            </a>
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description }}</p>
+                <p class="price mb-5">{{ product.price }} lei</p>
+                <div class="row mb-3">
+                    <div class="col-8">
+                        <button id="add_to_cart" class="btn btn-outline-dark"
+                            onClick="addItemToCart({{ product.id }})"> Add to cart
+                        </button>
+                    </div>
+                    <div class="col no-padding">
+                        <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" max="10" value="1">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>

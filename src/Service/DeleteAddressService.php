@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\Entity\Addresses;
 use Doctrine\ORM\EntityManagerInterface;
-use PhpParser\Node\Expr\Array_;
+use Exception;
 
 class DeleteAddressService
 {
@@ -19,12 +19,16 @@ class DeleteAddressService
 
     public function deleteAddresses($idAddresses): array
     {
-        try {
-            foreach ($idAddresses as $idAddress) {
+        try
+        {
+            foreach ($idAddresses as $idAddress)
+            {
                 $this->entityManager->remove($this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $idAddress]));
                 $this->entityManager->flush();
             }
-        } catch (\Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return ['message' => 'You already delete that address.', 'with' => 'danger'];
         }
 

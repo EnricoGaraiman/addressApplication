@@ -6,9 +6,10 @@ namespace App\Service;
 
 class FilterService
 {
-    public function orderDropdownProcess($order)
+    public function orderDropdownProcess($order): array
     {
-        switch ($order) {
+        switch ($order)
+        {
             case 'name_desc':
                 $orderBy = 'name';
                 $orderType = 'desc';
@@ -31,9 +32,10 @@ class FilterService
         ];
     }
 
-    public function orderDropdownProcessInAddresses($order)
+    public function orderDropdownProcessInAddresses($order): array
     {
-        switch ($order) {
+        switch ($order)
+        {
             case 'country_desc':
                 $orderBy = 'country';
                 $orderType = 'desc';
@@ -64,9 +66,10 @@ class FilterService
         ];
     }
 
-    public function orderDropdownProducts($order)
+    public function orderDropdownProducts($order): array
     {
-        switch ($order) {
+        switch ($order)
+        {
             case 'product_desc':
                 $orderBy = 'name';
                 $orderType = 'desc';

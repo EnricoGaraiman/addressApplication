@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Addresses;
 use App\Form\EditProfileFormType;
+use App\Form\ImportFileFormType;
+use App\Service\AddressesService;
 use App\Service\DeleteAddressService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +29,11 @@ class ProfileController extends AbstractController
     /**
      * @Route("/profile", name="profile")
      */
-    public function profile(Request $request, DeleteAddressService $deleteAddressService): Response
+    public function profile(Request $request,
+                            DeleteAddressService $deleteAddressService,
+                            AddressesService $addressesService,
+                            ParameterBagInterface $parameterBag
+    ): Response
     {
         $message = ['message' => '', 'with' => 'danger'];
         $user = $this->getUser();
@@ -34,13 +41,19 @@ class ProfileController extends AbstractController
         $defaultAddress = $this->entityManager->getRepository(Addresses::class)->findOneBy(['user' => $user, 'isDefault' => 1]);
 
         // Add to default address
-        if ($request->request->get('check') !== null and $request->request->get('set_default') !== null) {
-            if (count($request->request->get('check')) > 1) {
+        if ($request->request->get('check') !== null and $request->request->get('set_default') !== null)
+        {
+            if (count($request->request->get('check')) > 1)
+            {
                 $message = ['message' => 'You can add only one default address', 'with' => 'danger'];
-            } else {
+            }
+            else
+            {
                 $addressDefault = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id'=>$request->request->get('check')[0]]);
-                if($addressDefault !== null) {
-                    foreach ($user->getAddress() as $address) {
+                if($addressDefault !== null)
+                {
+                    foreach ($user->getAddress() as $address)
+                    {
                         $address->setIsDefault(0);
                         $this->entityManager->persist($address);
                         $this->entityManager->flush();
@@ -55,9 +68,12 @@ class ProfileController extends AbstractController
         }
 
         // Delete default address
-        if ($request->request->get('delete_default_address') !== null) {
-            if($user->getDefaultAddress() !== null) {
-                foreach ($user->getDefaultAddress() as $adr) {
+        if ($request->request->get('delete_default_address') !== null)
+        {
+            if($user->getDefaultAddress() !== null)
+            {
+                foreach ($user->getDefaultAddress() as $adr)
+                {
                     $adr->setIsDefault(0);
                     $this->entityManager->persist($adr);
                     $this->entityManager->flush();
@@ -68,34 +84,54 @@ class ProfileController extends AbstractController
         }
 
         // Delete addresses
-        if ($request->request->get('delete') !== null) {
-            if ($request->request->get('check') !== null) {
+        if ($request->request->get('delete') !== null)
+        {
+            if ($request->request->get('check') !== null)
+            {
                 $message = $deleteAddressService->deleteAddresses($request->request->get('check'));
                 $defaultAddress = $this->entityManager->getRepository(Addresses::class)->findOneBy(['user' => $user, 'isDefault' => 1]);
                 $userAddresses = $this->entityManager->getRepository(Addresses::class)->findBy(['user' => $user->getId()]);
-            } else {
+            }
+            else
+            {
                 $message = ['message' => 'Select one or more addresses', 'with' => 'danger'];
             }
         }
 
         // Update address
-        if ($request->request->get('update') !== null) {
-            if ($request->request->get('check') !== null) {
-                if (count($request->request->get('check')) == 1) {
+        if ($request->request->get('update') !== null)
+        {
+            if ($request->request->get('check') !== null)
+            {
+                if (count($request->request->get('check')) == 1)
+                {
                     return new RedirectResponse($this->generateUrl('update_address', ['slug' => $request->request->get('check')]));
-                } else {
+                }
+                else
+                {
                     $message = ['message' => 'You can update only one address at the same time', 'with' => 'danger'];
                 }
-            } else {
+            }
+            else
+            {
                 $message = ['message' => 'Select an address', 'with' => 'danger'];
             }
+        }
+
+        // Import
+        $importForm = $this->createForm(ImportFileFormType::class);
+        $importForm->handleRequest($request);
+        if ($importForm->isSubmitted() && $importForm->isValid())
+        {
+            $message = $addressesService->import($importForm->get('name')->getData(), $importForm->get('radio')->getData(), $parameterBag->get('brochures_directory'));
         }
 
         return $this->render('profile/profile.html.twig', [
             'message' => $message,
             'user' => $user,
             'userAddresses' => $userAddresses,
-            'defaultAddress' => $defaultAddress
+            'defaultAddress' => $defaultAddress,
+            'importForm'=>$importForm->createView()
         ]);
     }
 
@@ -104,12 +140,13 @@ class ProfileController extends AbstractController
      */
     public function editProfile(Request $request): Response
     {
-        $user = $this->getUser(); //userul logat
+        $user = $this->getUser();
         $message = ['message' => '', 'with' => 'danger'];
         $form = $this->createForm(EditProfileFormType::class, $user);
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid())
+        {
             $user->setName($form->get('name')->getData());
             $user->setEmail($form->get('email')->getData());
             $this->entityManager->persist($user);
@@ -128,24 +165,31 @@ class ProfileController extends AbstractController
      */
     public function changePassword(UserPasswordEncoderInterface $encoder, Request $request): Response
     {
-        $user = $this->getUser(); //userul logat
+        $user = $this->getUser();
         $message = ['message' => '', 'with' => 'danger'];
 
         $old_password = $request->request->get('old-password');
         $new_password = $request->request->get('new-password');
         $new_password_again = $request->request->get('new-password-again');
 
-        if ($old_password !== null) {
-            if ($new_password === $new_password_again) {
-                if ($encoder->isPasswordValid($user, $old_password)) {
+        if ($old_password !== null)
+        {
+            if ($new_password === $new_password_again)
+            {
+                if ($encoder->isPasswordValid($user, $old_password))
+                {
                     $user->setPassword($encoder->encodePassword($user, $new_password));
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
                     $message = ['message' => 'Password was change', 'with' => 'success'];
-                } else {
+                }
+                else
+                {
                     $message = ['message' => 'Old password is not correct', 'with' => 'danger'];
                 }
-            } else {
+            }
+            else
+            {
                 $message = ['message' => 'Password dont match', 'with' => 'danger'];
             }
         }
@@ -160,10 +204,11 @@ class ProfileController extends AbstractController
      */
     public function deleteAccount(Request $request): Response
     {
-        $user = $this->getUser(); //userul logat
-        $adrs = $this->entityManager->getRepository(Addresses::class)->findBy(['user' => $user->getId()]);
+        $user = $this->getUser();
+        $adr = $this->entityManager->getRepository(Addresses::class)->findBy(['user' => $user->getId()]);
 
-        foreach ($adrs as $item) {
+        foreach ($adr as $item)
+        {
             $this->entityManager->remove($item);
             $this->entityManager->flush();
         }

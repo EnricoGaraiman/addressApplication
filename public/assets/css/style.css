@@ -96,6 +96,13 @@ input[type='number'] {
     border: 1px solid #000000;
 }
 
+.export-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 10vh;
+    z-index: 10;
+}
+
 @media only screen and (max-width: 768px) {
     .btn {
         width: 100%;
@@ -117,5 +124,9 @@ input[type='number'] {
 
     #add_to_cart {
         margin: 0;
+    }
+
+    .export-btn {
+        right: 0;
     }
 }

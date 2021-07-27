@@ -22,14 +22,16 @@ class ProductsRepository extends ServiceEntityRepository
     public function getProductsForOnePage($offset, $limit, $choose, $searchParameter, $orderBy, $orderType)
     {
         $query = $this->createQueryBuilder('p');
-        if ($searchParameter !== '') {
+        if ($searchParameter !== '')
+        {
             $query->orWhere('p.name LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
                 ->orWhere('p.price LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%');
         }
 
-        if ($choose == 1) {
+        if ($choose == 1)
+        {
             $query->select('count(p.id)');
             return $query->getQuery()->getSingleScalarResult();
         }

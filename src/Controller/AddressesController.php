@@ -4,12 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Addresses;
 use App\Entity\City;
-use App\Entity\Country;
 use App\Form\AddNewAddressFormType;
-use App\Repository\CityRepository;
 use App\Service\DeleteAddressService;
 use App\Service\FilterService;
-use App\Service\UpdateAddressService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -43,10 +40,13 @@ class AddressesController extends AbstractController
         ];
 
         // Set as default
-        if($request->request->get('set_default') !== null) {
+        if($request->request->get('set_default') !== null)
+        {
             $addressDefault = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id'=>$request->request->get('set_default')]);
-            if($addressDefault !== null) {
-                foreach ($this->getUser()->getAddress() as $address) {
+            if($addressDefault !== null)
+            {
+                foreach ($this->getUser()->getAddress() as $address)
+                {
                     $address->setIsDefault(0);
                     $this->entityManager->persist($address);
                     $this->entityManager->flush();
@@ -59,12 +59,14 @@ class AddressesController extends AbstractController
         }
 
         // Update
-        if ($request->request->get('update_address') !== null) {
+        if ($request->request->get('update_address') !== null)
+        {
             return new RedirectResponse($this->generateUrl('update_address', ['slug' => $request->request->get('update_address')]));
         }
 
         // Delete
-        if ($request->request->get('delete_address') !== null) {
+        if ($request->request->get('delete_address') !== null)
+        {
             $deleteAddress = ['0'=>$request->request->get('delete_address')];
             $deleteAddressService->deleteAddresses($deleteAddress);
             $message = ['message'=>'You delete an address', 'with'=>'success'];
@@ -72,7 +74,8 @@ class AddressesController extends AbstractController
 
         // Search
         $searchParameter = '';
-        if ($request->get('search') !== null) {
+        if ($request->get('search') !== null)
+        {
             $searchParameter = $request->get('search');
         }
 
@@ -115,8 +118,10 @@ class AddressesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid())
         {
             $address = $form->getData();
-            if ($address->getIsDefault() !== false ) {
-                foreach ($user->getAddress() as $adr) {
+            if ($address->getIsDefault() !== false )
+            {
+                foreach ($user->getAddress() as $adr)
+                {
                     $adr->setIsDefault(0);
                     $this->entityManager->persist($adr);
                     $this->entityManager->flush();
@@ -137,19 +142,23 @@ class AddressesController extends AbstractController
     /**
      * @Route("addresses/update_address", name="update_address")
      */
-    public function updateAddress(Request $request, UpdateAddressService $updateAddressService): Response
+    public function updateAddress(Request $request): Response
     {
         $message = ['message' => '', 'with' => 'danger'];
         $user = $this->getUser();
 
-        if ($request->get('slug') !== null) {
+        if ($request->get('slug') !== null)
+        {
             $addressId = is_string($request->get('slug')) ? $request->get('slug') :  $request->get('slug')[0];
             $addressUpdate = $this->entityManager->getRepository(Addresses::class)->findOneBy(['id' => $addressId, 'user'=>$user]);
 
-            if($addressUpdate === null) {
+            if($addressUpdate === null)
+            {
                 return new RedirectResponse($this->generateUrl('profile'));
             }
-        } else {
+        }
+        else
+        {
             return new RedirectResponse($this->generateUrl('profile'));
         }
 
@@ -159,8 +168,10 @@ class AddressesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid())
         {
             $address = $form->getData();
-            if ($address->getIsDefault() !== false ) {
-                foreach ($user->getAddress() as $adr) {
+            if ($address->getIsDefault() !== false )
+            {
+                foreach ($user->getAddress() as $adr)
+                {
                     $adr->setIsDefault(0);
                     $this->entityManager->persist($adr);
                     $this->entityManager->flush();
@@ -194,7 +205,8 @@ class AddressesController extends AbstractController
         ;
 
         $responseArray = array();
-        foreach($cities as $city){
+        foreach($cities as $city)
+        {
             $responseArray[] = array(
                 "id" => $city->getId(),
                 "name" => $city->getName()

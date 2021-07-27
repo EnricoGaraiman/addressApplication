@@ -33,7 +33,8 @@ class UsersController extends AbstractController
 
         // Search
         $searchParameter = '';
-        if ($request->get('search') !== null) {
+        if ($request->get('search') !== null)
+        {
             $searchParameter = $request->get('search');
         }
 

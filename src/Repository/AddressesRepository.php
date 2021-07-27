@@ -7,6 +7,8 @@ use App\Entity\City;
 use App\Entity\Country;
 use App\Entity\Users;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -22,6 +24,10 @@ class AddressesRepository extends ServiceEntityRepository
         parent::__construct($registry, Addresses::class);
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getAddressesForOnePage($offset, $limit, $choose, $searchParameter, $orderBy, $orderType)
     {
         $query = $this->createQueryBuilder('a');

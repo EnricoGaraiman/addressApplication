@@ -7,3 +7,12 @@
                        onclick="return confirm('Are you sure?')">Change password</a></p>
 <p>Delete account: <a href="{{ path('delete_account') }}" class="btn btn-danger"
                       onclick="return confirm('Are you sure?')">Delete account</a></p>
+
+<h1>Import</h1>
+{{ form_start(importForm) }}
+{{ form_row(importForm.name, {'attr': {'class': 'form-control'}}) }}
+{{ form_row(importForm.radio, {'attr': {'class': 'form-control'}}) }}
+{{ form_row(importForm.import) }}
+{{ form_end(importForm) }}
+
+

@@ -39,9 +39,20 @@ class Products
      */
     private $ordersProducts;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Files::class, mappedBy="product",cascade={"persist"})
+     */
+    private $files;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $slug;
+
     public function __construct()
     {
         $this->ordersProducts = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -116,19 +127,45 @@ class Products
     }
 
     /**
-     * @ORM\Column(type="string")
+     * @return Collection|Files[]
      */
-    private $brochureFilename;
-
-    public function getBrochureFilename()
+    public function getFiles(): Collection
     {
-        return $this->brochureFilename;
+        return $this->files;
     }
 
-    public function setBrochureFilename($brochureFilename)
+    public function addFile(Files $file): self
     {
-        $this->brochureFilename = $brochureFilename;
+        if (!$this->files->contains($file)) {
+            $this->files[] = $file;
+            $file->setProduct($this);
+        }
 
         return $this;
     }
+
+    public function removeFile(Files $file): self
+    {
+        if ($this->files->removeElement($file)) {
+            // set the owning side to null (unless already changed)
+            if ($file->getProduct() === $this) {
+                $file->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
 }

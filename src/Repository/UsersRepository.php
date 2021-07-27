@@ -27,7 +27,8 @@ class UsersRepository extends ServiceEntityRepository implements PasswordUpgrade
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
-        if (!$user instanceof Users) {
+        if (!$user instanceof Users)
+        {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
         }
 
@@ -39,14 +40,16 @@ class UsersRepository extends ServiceEntityRepository implements PasswordUpgrade
     public function getUsersForOnePage($offset, $limit, $choose, $searchParameter, $orderBy, $orderType)
     {
         $query = $this->createQueryBuilder('u');
-        if ($searchParameter !== '') {
+        if ($searchParameter !== '')
+        {
             $query->orWhere('u.name LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%')
                 ->orWhere('u.email LIKE :searchParameter')
                 ->setParameter('searchParameter', '%' . $searchParameter . '%');
         }
 
-        if ($choose == 1) {
+        if ($choose == 1)
+        {
             $query->select('count(u.id)');
             return $query->getQuery()->getSingleScalarResult();
         }

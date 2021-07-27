@@ -42,7 +42,8 @@ class AddNewAddressFormType extends AbstractType
         ;
     }
 
-    protected function addElements(FormInterface $form, Country $country = null) {
+    protected function addElements(FormInterface $form, Country $country = null)
+    {
         $form->add('country', EntityType::class, array(
             'required' => true,
             'mapped'=>false,
@@ -73,14 +74,16 @@ class AddNewAddressFormType extends AbstractType
         ));
     }
 
-    function onPreSubmit(FormEvent $event) {
+    function onPreSubmit(FormEvent $event)
+    {
         $form = $event->getForm();
         $data = $event->getData();
         $country = $this->em->getRepository(Country::class)->find($data['country']);
         $this->addElements($form, $country);
     }
 
-    function onPreSetData(FormEvent $event) {
+    function onPreSetData(FormEvent $event)
+    {
         $address = $event->getData();
         $form = $event->getForm();
         $country = $address->getCity() ? $address->getCity()->getCountry() : null;

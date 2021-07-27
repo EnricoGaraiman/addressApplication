@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block body %}
+    <div id="products" class="container profile-data mt-5 pt-3 mb-5">
+        <div class="row">
+            <div class="col-4">
+                {% set files = filesService.getFiles(product) %}
+                {% for file in files %}
+                    <img src="{{ asset('uploads/images/'~file.name) }}" class="card-img-top mb-3" alt="{{ file.name }}">
+                {% else %}
+                    <img src="{{ asset('assets/img/no-image.jfif') }}" class="card-img-top" alt="No image" height="100%">
+                {% endfor %}
+            </div>
+            <div class="col">
+                <div class="black-bg" style="margin: 0">
+                    <h1>Information</h1>
+                    <p>Name: {{ product.name }}</p>
+                    <p>Description: {{ product.description }}</p>
+                    <p>Price: {{ product.price }} lei</p>
+                    <div class="row">
+                        <div class="col-8">
+                            <button id="add_to_cart" class="btn btn-light"
+                                    onClick="addItemToCart({{ product.id }})"> Add to cart
+                            </button>
+                        </div>
+                        <div class="col">
+                            <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" max="10" value="1">
+                        </div>
+                    </div>
+                </div>
+                <div class="black-bg" style="margin: 20px 0;">
+                    {% set documents = filesService.getDocument(product) %}
+                    {% for document in documents %}
+                    {% if document %}
+                        <p>Document name: {{ document.name }}: </p>
+                        <a href="{{ path('preview_document', {'documentName': document.name}) }}" target="_blank" class="btn btn-light mt-3">Preview</a>
+                        <a href="{{ path('download_document', {'documentName': document.name}) }}" target="_blank" class="btn btn-light mt-3">Download</a>
+                    {% else %}
+                        <p>No document available</p>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="black-bg" style="margin: 20px 0;">
+                    <p>Update this product </p>
+                    <a href="{{ path('update_product', {'product': product.slug}) }}" target="_blank" class="btn btn-warning mt-3">Update product</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function addItemToCart(productId) {
+            let productQuantity = $("#quantity".concat(productId)).val();
+            let jqSelector = $('#cart-icon .item-number');
+            let cartQuantity = parseInt(jqSelector.html());
+            jqSelector.html(cartQuantity + parseInt(productQuantity));
+            $.ajax({
+                type: 'GET',
+                url: '{{ path('add_to_card_product') }}',
+                data: {
+                    'id': productId,
+                    'quantity': productQuantity
+                },
+                success: function (response) {
+
+                },
+                error: function (err) {
+                    alert("An error occurred while loading data ...");
+                    $('#cart-icon .item-number').html(cartQuantity - parseInt(productQuantity));
+                }
+            });
+        }
+    </script>
+{% endblock %}

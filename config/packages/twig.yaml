@@ -3,6 +3,7 @@ twig:
     globals:
         actualDate: '@App\Service\DataVersion'
         numberOfProductsInCart: '@App\Service\NumberOfProductsService'
+        filesService: '@App\Service\ProductService'
 
 when@test:
     twig:

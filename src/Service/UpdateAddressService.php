@@ -5,7 +5,6 @@ namespace App\Service;
 
 
 use App\Entity\Addresses;
-use App\Entity\Users;
 use Doctrine\ORM\EntityManagerInterface;
 
 class UpdateAddressService

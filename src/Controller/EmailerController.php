@@ -5,7 +5,9 @@ namespace App\Controller;
 
 use App\Entity\Users;
 use App\Form\ChangePasswordFormType;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Mailer\MailerInterface;
@@ -48,7 +50,7 @@ class EmailerController extends AbstractController
                 $payload = [
                     'id'=>$user->getId(),
                     'email'=>$user->getEmail(),
-                    'date' => (new \DateTime())->modify('+2 hour')->format('Y-m-d H-i-s')
+                    'date' => (new DateTime())->modify('+2 hour')->format('Y-m-d H-i-s')
                 ];
 
                 $jwtToken = JWT::encode($payload, $key);
@@ -64,7 +66,7 @@ class EmailerController extends AbstractController
                     $mailer->send($email);
                     $message = ['message'=>'The email was send. Check your inbox and follow the instructions', 'with'=>'success'];
                 }
-                catch (\Exception $e)
+                catch (Exception $e)
                 {
                     $message = ['message'=>'The email was not send. Please try again', 'with'=>'danger'];
                 }
@@ -94,8 +96,8 @@ class EmailerController extends AbstractController
 
         if( $user->getId() === $decodedToken['id'] and
             $user->getEmail() === $decodedToken['email'] and
-            (new \DateTime())->format('Y-m-d H-i-s') <=
-            \DateTime::createFromFormat('Y-m-d H-i-s', $decodedToken['date'])->format("Y-m-d H:i:s"))
+            (new DateTime())->format('Y-m-d H-i-s') <=
+            DateTime::createFromFormat('Y-m-d H-i-s', $decodedToken['date'])->format("Y-m-d H:i:s"))
         {
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid())
@@ -119,7 +121,7 @@ class EmailerController extends AbstractController
                         $mailer->send($email);
                         return new RedirectResponse($this->generateUrl('app_login'));
                     }
-                    catch (\Exception $e)
+                    catch (Exception $e)
                     {
                         $message = ['message'=>'The password was not change. Please try again', 'with'=>'danger'];
                     }

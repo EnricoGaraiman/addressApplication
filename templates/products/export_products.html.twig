@@ -1,0 +1,29 @@
+<button type="button" class="btn btn-success export-btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Export products
+</button>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Export products</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% set headerFile = ['Id', 'Name', 'Description', 'Price', 'Images', 'Documents'] %}
+                {% for head in headerFile %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ head }}" id="flexCheckChecked{{ head }}" name="selection[]" checked>
+                    <label class="form-check-label" for="flexCheckChecked{{ head }}">
+                        {{ head }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <input type="submit" name="export_products" class="btn btn-success" value="Export products">
+            </div>
+        </div>
+    </div>
+</div>
