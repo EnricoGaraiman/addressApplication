@@ -282,7 +282,8 @@ class ProductsController extends AbstractController
         $product = $this->entityManager->getRepository(Products::class)->findOneBy(['id'=>$request->get('id')]);
         $response = new Response();
 
-        if($product !== null) {
+        if($product !== null)
+        {
             $cart = unserialize($request->cookies->get('cart'));
             if($cart !== false and array_key_exists($request->get('id'), $cart))
             {
@@ -302,7 +303,8 @@ class ProductsController extends AbstractController
         $product = $this->entityManager->getRepository(Products::class)->findOneBy(['id'=>$request->get('id')]);
         $response = new Response();
 
-        if($product !== null) {
+        if($product !== null)
+        {
             $cart = unserialize($request->cookies->get('cart'));
             if($cart !== false and array_key_exists($request->get('id'), $cart))
             {
@@ -328,8 +330,10 @@ class ProductsController extends AbstractController
     {
         $response = new Response();
         $address = $form->getData();
-        if ($address->getIsDefault() !== false ) {
-            foreach ($this->getUser()->getAddress() as $adr) {
+        if ($address->getIsDefault() !== false )
+        {
+            foreach ($this->getUser()->getAddress() as $adr)
+            {
                 $adr->setIsDefault(0);
                 $this->entityManager->persist($adr);
                 $this->entityManager->flush();
@@ -352,10 +356,12 @@ class ProductsController extends AbstractController
         $form = $this->createForm(ProductFormType::class, $product);
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid())
+        {
             $imagesFile = $form->get('image')->getData();
             $product = $form->getData();
-            if (count($imagesFile) > 0) {
+            if (count($imagesFile) > 0)
+            {
                 foreach ($imagesFile as $key=>$imageFile)
                 {
                     if($imageFile)
@@ -411,19 +417,25 @@ class ProductsController extends AbstractController
         $form = $this->createForm(ProductFormType::class, $productUpdate);
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid())
+        {
             $imagesFile = $form->get('image')->getData();
             $product = $form->getData();
             if (count($imagesFile) > 0) {
-                foreach ($imagesFile as $key => $imageFile) {
-                    if ($imageFile) {
+                foreach ($imagesFile as $key => $imageFile)
+                {
+                    if ($imageFile)
+                    {
                         $fileName = $fileUploader->upload($imageFile['name']);
                         $file = new Files();
                         $file->setName($fileName)
                             ->setType(Files::TYPE['image']);
-                        if ($imageFile['position'] !== null) {
+                        if ($imageFile['position'] !== null)
+                        {
                             $file->setPosition($imageFile['position']);
-                        } else {
+                        }
+                        else
+                        {
                             $file->setPosition($key);
                         }
                         $product->addFile($file);
@@ -432,7 +444,8 @@ class ProductsController extends AbstractController
             }
 
             $documentFile = $form->get('document')->getData();
-            if ($documentFile) {
+            if ($documentFile)
+            {
                 $fileName = $fileUploader->upload($documentFile);
                 $file = new Files();
                 $file->setName($fileName)

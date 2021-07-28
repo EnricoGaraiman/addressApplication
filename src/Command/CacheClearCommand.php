@@ -2,14 +2,11 @@
 namespace App\Command;
 
 
-use App\Service\AddressesVerify;
 use App\Service\DataVersion;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\VarDumper\Cloner\Data;
 
 class CacheClearCommand extends Command
 {
@@ -30,7 +27,7 @@ class CacheClearCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $this->dataVersion->getVersion();
+        $this->dataVersion->getVersion(true);
         $io->success('Fetch new version of assets.');
         return 0;
     }
