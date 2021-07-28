@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Online store{% endblock %}
+{% block title %}My orders{% endblock %}
 
 {% block body %}
     <div class="container profile-data mt-5 pt-3">
         {% set i = 0 %}
-        {% for order in orders %}
+        {% for order in orders|sort|reverse %}
             {% set i = i + 1 %}
             <div class="cart-dashboard mb-2" data-bs-toggle="collapse" data-bs-target="#collapseExample{{ i }}" aria-expanded="false" aria-controls="collapseExample">
                 <p>Order {{ i }}<span class="float-end">{{ order.orderDate|date('Y-m-d') }}, {{ order.orderDate|date('H-i-s') }}</span></p>
@@ -23,15 +23,15 @@
                             </thead>
                             <tbody>
                             {% for key, value in fullOrders %}
-                            {% if key == order.id %}
-                                {% for product in value %}
-                                <tr>
-                                    <td>{{ product.product.name }}</td>
-                                    <td>{{ product.product.price }} lei</td>
-                                    <td>{{ product.qty }}</td>
-                                </tr>
-                                {% endfor %}
-                            {% endif %}
+                                {% if key == order.id %}
+                                    {% for product in value %}
+                                    <tr>
+                                        <td>{{ product.product.name }}</td>
+                                        <td>{{ product.product.price }} lei</td>
+                                        <td>{{ product.qty }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
                             {% endfor %}
                             </tbody>
                             <tfoot>

@@ -24,9 +24,12 @@ class AddressesService
         $message = ['message' => '', 'with' => ''];
 
         $filePathName = md5(uniqid()) . $file->getClientOriginalName();
-        try {
+        try
+        {
             $file->move($directory, $filePathName);
-        } catch (FileException $e) {
+        }
+        catch (FileException $e)
+        {
             $message = ['message' => 'Error. Try again', 'with' => 'danger'];
         }
         $spreadsheet = IOFactory::load($directory.'/'.$filePathName);

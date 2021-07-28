@@ -14,8 +14,7 @@
     {% endblock %}
 
 </head>
-<body style="background-image: url({{ asset('assets/img/background.jpg') }});
-        ">
+<body style="background-image: url({{ asset('assets/img/background.jpg') }});">
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
@@ -27,28 +26,28 @@
                 {% if app.user %}
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{{ path('profile') }}">My profile</a>
+                            <a class="nav-link {% if (app.request.pathInfo == path('profile')) %} active{% endif %}" aria-current="page" href="{{ path('profile') }}">My profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('users') }}">Users</a>
+                            <a class="nav-link {% if (app.request.pathInfo == path('users')) %} active{% endif %}" href="{{ path('users') }}">Users</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('addresses') }}">Addresses</a>
+                            <a class="nav-link {% if (app.request.pathInfo == path('addresses')) %} active{% endif %}" href="{{ path('addresses') }}">Addresses</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('add_new_address') }}">Add new address</a>
+                            <a class="nav-link {% if (app.request.pathInfo == path('add_new_address')) %} active{% endif %}" href="{{ path('add_new_address') }}">Add new address</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('products') }}">Online store</a>
+                            <a class="nav-link {% if (app.request.pathInfo == path('products')) %} active{% endif %}" href="{{ path('products') }}">Online store</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('add_product') }}">Add product</a>
+                            <a class="nav-link {% if (app.request.pathInfo == path('add_product')) %} active{% endif %}" href="{{ path('add_product') }}">Add product</a>
                         </li>
                     </ul>
-                    <a id="cart-icon" class="nav-link navbar-text nav-cart" href="{{ path('cart') }}"><i
-                                class="fas fa-shopping-cart "></i> Your cart<span
+                    <a id="cart-icon" class="nav-link navbar-text nav-cart {% if (app.request.pathInfo == path('cart')) %} active{% endif %}" href="{{ path('cart') }}"><i
+                                class="fas fa-shopping-cart"></i> Your cart<span
                                 class="item-number">{{ numberOfProductsInCart.getNumberOfProducts(app.request) }}</span></a>
-                    <a class="nav-link navbar-text nav-cart" href="{{ path('my_orders') }}">Your orders</a>
+                    <a class="nav-link navbar-text nav-cart {% if (app.request.pathInfo == path('my_orders')) %} active{% endif %}" href="{{ path('my_orders') }}">Your orders</a>
                     <span class="navbar-text"> Hi, {{ app.user.name }}!
                         <a href="{{ path('app_logout') }}" onclick="setCookie('cart', '', -1); setCookie('destinationAddress', '', -1)">Logout</a>
                     </span>

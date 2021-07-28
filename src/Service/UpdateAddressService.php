@@ -22,10 +22,13 @@ class UpdateAddressService
         $address->setCountry($input['country'])
             ->setCity($input['city'])
             ->setAddress($input['address']);
-        if (isset($input['default']) ) {
+        if (isset($input['default']) )
+        {
             $addressDefault = $this->entityManager->getRepository(Addresses::class)->findOneBy(['user' => $user, 'isDefault' => 1]);
-            if($addressDefault !== null) {
-                foreach ($user->getAddress() as $adr) {
+            if($addressDefault !== null)
+            {
+                foreach ($user->getAddress() as $adr)
+                {
                     $adr->setIsDefault(0);
                     $this->entityManager->persist($adr);
                     $this->entityManager->flush();
@@ -33,7 +36,8 @@ class UpdateAddressService
             }
             $address->setIsDefault(1);
         }
-        else {
+        else
+        {
             $address->setIsDefault(0);
         }
         $this->entityManager->persist($address);

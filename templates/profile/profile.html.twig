@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello {{ app.user.name }}{% endblock %}
+{% block title %}Hi, {{ app.user.name }}{% endblock %}
 
 {% block body %}
     <div class="container profile-data mt-5 pt-3">
@@ -19,4 +19,13 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function () {
+            $('#import_file_form_name').attr('accept', '.xls,.xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel');
+        });
+    </script>
 {% endblock %}

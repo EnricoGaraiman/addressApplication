@@ -5,6 +5,10 @@ body {
     background-size: cover;
 }
 
+.active {
+    color: #FFFFFF !important;
+}
+
 #login-section {
     min-height: 90vh;
 }

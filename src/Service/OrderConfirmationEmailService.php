@@ -30,7 +30,8 @@ class OrderConfirmationEmailService
         $ordersProducts = $this->entityManager->getRepository(OrdersProducts::class)->findBy(['parentOrder'=>$orderId]);
         $order = $this->entityManager->getRepository(Orders::class)->findOneBy(['id'=>$orderId]);
         $totalPrice = $order->getTotal();
-        foreach($ordersProducts as $product) {
+        foreach($ordersProducts as $product)
+        {
             $numberOfProducts += $product->getQty();
         }
 

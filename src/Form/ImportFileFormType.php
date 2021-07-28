@@ -17,7 +17,7 @@ class ImportFileFormType extends AbstractType
     {
         $builder
             ->add('name', FileType::class, [
-                'label' => 'Import countries and cities',
+                'label' => 'Import countries or cities',
                 'mapped' => false,
                 'attr' => ['class' => 'form-control mt-3'],
                 'constraints' => [
