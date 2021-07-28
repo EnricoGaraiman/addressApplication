@@ -10,7 +10,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CacheClearCommand extends Command
 {
-    protected static $defaultName = 'frontend:cache:clear';
     private $dataVersion;
 
     public function __construct(DataVersion $dataVersion)
